@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🌙 Alya’s Celestial Birthday · 2026</title>
+    <!-- Fonts + Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- GSAP + ScrollTrigger for smooth scroll animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0710;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            color: #f5eaff;
+            scroll-behavior: smooth;
+        }
+
+        /* custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a142f; }
+        ::-webkit-scrollbar-thumb { background: #ff86b5; border-radius: 8px; }
+
+        /* floating particle canvas (background) */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* main content stack */
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 6rem;
+        }
+
+        /* each story block */
+        .story-block {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .story-block.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* glassy card effect */
+        .glass-panel {
+            background: rgba(20, 15, 40, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 3rem;
+            border: 1px solid rgba(255, 140, 180, 0.4);
+            padding: 2.5rem 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 700px;
+            transition: all 0.3s;
+        }
+
+        h1, h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #FFD966, #FF9BC0, #C385FF);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(120deg, #ffb7d4, #ff8ac0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .sub {
+            font-size: 1.1rem;
+            color: #d9cafc;
+            letter-spacing: 1px;
+        }
+
+        .quote-text {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            margin: 1.5rem 0;
+            font-weight: 400;
+        }
+
+        .memory-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .memory-item {
+            background: rgba(255, 200, 220, 0.08);
+            border-radius: 2rem;
+            padding: 1rem 1.5rem;
+            width: 160px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 150, 200, 0.3);
+            transition: all 0.3s;
+        }
+        .memory-item i {
+            font-size: 2.5rem;
+            color: #ffb3d4;
+            margin-bottom: 0.5rem;
+        }
+        .memory-item:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 110, 170, 0.2);
+            border-color: #ff96c0;
+        }
+
+        .wish-glow {
+            background: linear-gradient(145deg, rgba(255,100,150,0.15), rgba(100,80,255,0.1));
+            border-radius: 2rem;
+            padding: 1.8rem;
+            border-left: 3px solid #ff80b0;
+        }
+
+        .big-star {
+            font-size: 3rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .big-star:hover {
+            transform: scale(1.1);
+            text-shadow: 0 0 15px #ffb0d0;
+        }
+
+        .celebrate-button {
+            background: linear-gradient(95deg, #ff5090, #b45eff);
+            border: none;
+            padding: 14px 32px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .celebrate-button:hover {
+            transform: scale(1.03);
+            background: linear-gradient(95deg, #ff6da6, #c76eff);
+            box-shadow: 0 12px 28px #ff509055;
+        }
+
+        .floating-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            z-index: 99;
+            pointer-events: none;
+            font-weight: 300;
+        }
+
+        @media (max-width: 650px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2rem; }
+            .quote-text { font-size: 1rem; }
+            .glass-panel { padding: 1.5rem; }
+            .memory-item { width: 130px; }
+        }
+        hr {
+            width: 80px;
+            margin: 1rem auto;
+            border-color: #ff80b0;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<div class="content">
+    <!-- block 1: hero introduction -->
+    <div class="story-block" id="heroBlock">
+        <div class="glass-panel">
+            <div class="sub">✦ THE COSMOS WHISPERS YOUR NAME ✦</div>
+            <h1>Alya, <br>You Are The Light</h1>
+            <div class="quote-text">"On this day, the universe paused — and gifted us a soul made of stardust and kindness."</div>
+            <div><i class="fa-regular fa-star" style="color:#ffb0d0"></i>   <i class="fa-regular fa-heart"></i>   <i class="fa-regular fa-moon"></i></div>
+            <div style="margin-top: 20px; font-size:0.9rem;">✨ scroll to begin the journey ✨</div>
+        </div>
+    </div>
+
+    <!-- block 2: golden memories (personal) -->
+    <div class="story-block" id="memoriesBlock">
+        <div class="glass-panel">
+            <h2>🌸 petals of us 🌸</h2>
+            <div class="sub">moments that glow forever</div>
+            <div class="memory-grid">
+                <div class="memory-item"><i class="fa-regular fa-sun"></i><br>your laughter like dawn</div>
+                <div class="memory-item"><i class="fa-regular fa-comment-dots"></i><br>late night confessions</div>
+                <div class="memory-item"><i class="fa-regular fa-hand-peace"></i><br>when words weren't needed</div>
+                <div class="memory-item"><i class="fa-regular fa-gem"></i><br>the quiet magic you carry</div>
+            </div>
+            <div class="quote-text" style="font-size:1rem; font-style:italic;">Every memory with you is a constellation I’ll never stop looking at.</div>
+        </div>
+    </div>
+
+    <!-- block 3: heartfelt wish (sincere) -->
+    <div class="story-block" id="wishBlock">
+        <div class="glass-panel">
+            <h2>💫 my secret wish for you 💫</h2>
+            <div class="wish-glow">
+                <i class="fa-solid fa-feather"></i> May every road you take bloom with roses,<br>
+                may your dreams be weightless and wild,<br>
+                may you always find a hand to hold, a reason to smile,<br>
+                and may the stars remember your name forever.
+                <hr>
+                <span style="font-weight:300;">You are not just a birthday — you are a festival of light, Alya.</span>
+            </div>
+            <div style="margin-top: 1.2rem;">
+                <i class="fa-regular fa-clock"></i> And this year, all the minutes bow to you.
+            </div>
+        </div>
+    </div>
+
+    <!-- block 4: final grand celebration + interactive wish -->
+    <div class="story-block" id="celebrationBlock">
+        <div class="glass-panel" style="text-align: center;">
+            <div class="big-star" id="makeAWishStar">
+                <i class="fa-regular fa-star"></i> <i class="fa-solid fa-star"></i> <i class="fa-regular fa-star"></i>
+            </div>
+            <h2 style="margin-top: 0.5rem;">Make a wish, Alya ✨</h2>
+            <div class="quote-text">“You are the poem I didn’t know I was writing.”<br> — Happy Birthday to my favorite universe.</div>
+            <button id="finalFireworksBtn" class="celebrate-button"><i class="fa-regular fa-gem"></i> IGNITE THE SKY <i class="fa-regular fa-gem"></i></button>
+            <div class="sub" style="margin-top: 15px;">click the star or the button — confetti & magic await</div>
+        </div>
+    </div>
+    <div style="text-align: center; padding: 2rem 0 1rem; opacity:0.7;">🎂 forever yours, today and always 🎂</div>
+</div>
+<div class="floating-badge"><i class="fa-regular fa-heart"></i> for Alya · 2026</div>
+
+<script>
+    // 🌟 interactive particle field (ethereal stars + floating orbs)
+    const canvas = document.getElementById('particleCanvas');
+    let ctx = canvas.getContext('2d');
+    let particles = [];
+    let width, height;
+    let mouse = { x: null, y: null };
+    
+    function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles(180);
+    }
+    
+    function initParticles(count) {
+        particles = [];
+        for(let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 2.5 + 0.8,
+                alpha: Math.random() * 0.6 + 0.2,
+                vx: (Math.random() - 0.5) * 0.2,
+                vy: (Math.random() - 0.5) * 0.1,
+                glow: Math.random() * 0.03,
+            });
+        }
+    }
+    
+    function drawParticles() {
+        if(!ctx) return;
+        ctx.clearRect(0, 0, width, height);
+        // dark gradient base
+        const grad = ctx.createLinearGradient(0, 0, width*0.8, height);
+        grad.addColorStop(0, '#0a041a');
+        grad.addColorStop(1, '#140f2a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+        
+        for(let p of particles) {
+            // mouse interaction: subtle push
+            if(mouse.x && mouse.y) {
+                let dx = p.x - mouse.x;
+                let dy = p.y - mouse.y;
+                let dist = Math.hypot(dx, dy);
+                if(dist < 100) {
+                    let angle = Math.atan2(dy, dx);
+                    let force = (100 - dist) / 500;
+                    p.x += Math.cos(angle) * force;
+                    p.y += Math.sin(angle) * force;
+                }
+            }
+            p.x += p.vx;
+            p.y += p.vy;
+            if(p.x < 0) p.x = width;
+            if(p.x > width) p.x = 0;
+            if(p.y < 0) p.y = height;
+            if(p.y > height) p.y = 0;
+            
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            let twinkle = 0.5 + Math.sin(Date.now() * p.glow) * 0.3;
+            ctx.fillStyle = `rgba(255, 200, 230, ${p.alpha * twinkle})`;
+            ctx.fill();
+        }
+        // add floating dust rings
+        for(let i = 0; i < 6; i++) {
+            let t = Date.now() * 0.0006 + i;
+            let x = (Math.sin(t) * 0.4 + 0.5) * width;
+            let y = (Math.cos(t * 0.9) * 0.3 + 0.5) * height;
+            let rad = 45 + Math.sin(t)*12;
+            ctx.beginPath();
+            ctx.arc(x, y, rad, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(255,100,170,0.04)`;
+            ctx.fill();
+        }
+        requestAnimationFrame(drawParticles);
+    }
+    
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        initParticles(200);
+    });
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    resizeCanvas();
+    initParticles(200);
+    drawParticles();
+    
+    // --- ScrollTrigger / intersection reveal (GSAP + simple observer fallback)
+    gsap.registerPlugin(ScrollTrigger);
+    
+    const blocks = document.querySelectorAll('.story-block');
+    blocks.forEach(block => {
+        gsap.fromTo(block, 
+            { opacity: 0, y: 60 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: block,
+                    start: "top 85%",
+                    end: "top 30%",
+                    toggleActions: "play none none reverse",
+                }
+            }
+        );
+    });
+    
+    // final interactive star + button (confetti + message)
+    const starBtn = document.getElementById('makeAWishStar');
+    const fireBtn = document.getElementById('finalFireworksBtn');
+    
+    function megaCelebration() {
+        // intense confetti cascade
+        const duration = 2000;
+        const end = Date.now() + duration;
+        const colors = ['#ff88bb', '#ffd966', '#b980ff', '#ff5c8e', '#fff0a0'];
+        (function frame() {
+            canvasConfetti({ particleCount: 8, angle: 55, spread: 55, origin: { x: 0, y: 0.6 }, colors, startVelocity: 18 });
+            canvasConfetti({ particleCount: 8, angle: 125, spread: 55, origin: { x: 1, y: 0.6 }, colors, startVelocity: 18 });
+            canvasConfetti({ particleCount: 15, spread: 70, origin: { y: 0.7, x: 0.5 }, colors, startVelocity: 14, decay: 0.9 });
+            if (Date.now() < end) requestAnimationFrame(frame);
+            else {
+                canvasConfetti({ particleCount: 300, spread: 100, origin: { y: 0.6 }, colors, startVelocity: 24 });
+                canvasConfetti({ particleCount: 120, spread: 70, origin: { y: 0.4, x: 0.2 }, startVelocity: 28 });
+                canvasConfetti({ particleCount: 120, spread: 70, origin: { y: 0.4, x: 0.8 }, startVelocity: 28 });
+                // floating wish alert
+                const toast = document.createElement('div');
+                toast.innerText = "🌟✨ Your wish has been heard by the stars, Alya! ✨🌟";
+                toast.style.position = 'fixed';
+                toast.style.bottom = '30%';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.backgroundColor = '#ff88bbee';
+                toast.style.backdropFilter = 'blur(8px)';
+                toast.style.padding = '12px 24px';
+                toast.style.borderRadius = '60px';
+                toast.style.fontWeight = 'bold';
+                toast.style.color = '#0a041a';
+                toast.style.zIndex = '999';
+                toast.style.fontSize = '1rem';
+                toast.style.whiteSpace = 'nowrap';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2800);
+            }
+        }());
+        // gsap pulse on glass panel
+        gsap.to('.glass-panel:last-child', { scale: 1.02, duration: 0.2, repeat: 2, yoyo: true });
+    }
+    
+    starBtn.addEventListener('click', megaCelebration);
+    fireBtn.addEventListener('click', megaCelebration);
+    
+    // Optional small entry effect on hero
+    gsap.fromTo('#heroBlock .glass-panel', 
+        { scale: 0.96, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 1, delay: 0.2, ease: "back.out(0.7)" }
+    );
+    
+    // Add a gentle parallax to particle canvas on scroll? subtle
+    window.addEventListener('scroll', () => {
+        let scrollY = window.scrollY;
+        canvas.style.transform = `translateY(${scrollY * 0.02}px)`;
+    });
+    
+    // also show heartfelt console message for extra touch
+    console.log("%c✨ Happy Birthday, Alya! ✨ You are one of a kind. ✨", "color: #ff88bb; font-size: 16px; font-weight: bold;");
+</script>
+</body>
+</html>
